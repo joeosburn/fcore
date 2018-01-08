@@ -14,13 +14,14 @@ class Core
 
   def run
     loop do
-      set, _ = IO.select(@servers + @handlers.keys)
+      rs, _ = IO.select(@servers + @handlers.keys)
     
-      set.each do |read|
+      rs.each do |read|
         if read.is_a?(TCPServer)
           handle_incoming(read)
         else
-          puts "Got #{@handlers[read].read}"
+          data = read.read_nonblock(1024)
+          @handlers[read].read_data(data)
         end
       end
     end
@@ -29,7 +30,7 @@ class Core
   def handle_incoming(server)
     begin
       socket = server.accept_nonblock
-      @handlers[socket] = Handler.new(socket, @handler_class)
+      @handlers[socket] = Handler.new
     rescue IO::WaitReadable, Errno::EINTR
       IO.select([server])
       retry
