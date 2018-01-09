@@ -137,7 +137,7 @@ class FCore::HttpServer
     end
 
     def send_error(status_code)
-      write_data "HTTP/1.1 #{status_code}\r\nConnection: close\r\nContent-Type: text/plain\r\n"
+      write_data "HTTP/1.1 #{status_code}\r\nContent-Type: text/plain\r\nConnection: close\r\n"
       flush_and_close
     end
 
