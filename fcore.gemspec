@@ -14,4 +14,6 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.require_paths = ['lib']
   spec.test_files = Dir['spec/**/*']
+  
+  spec.add_dependency 'http-parser-lite', '~> 0.6.0'
 end

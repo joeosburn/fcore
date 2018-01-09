@@ -24,7 +24,7 @@ class FCore::Core
 
   def run
     loop do
-      rs, ws = IO.select(@servers.keys + @handlers.keys, @handlers.select { |k, v| v.outgoing? }.keys)
+      rs, ws = IO.select(@servers.keys + @handlers.keys, @handlers.select { |k, v| v.outgoing? || v.close? }.keys)
     
       rs.each do |read|
         if @servers[read]
@@ -40,8 +40,15 @@ class FCore::Core
       end
 
       ws.each do |write|
-        sent = write.send(@handlers[write].outgoing, 0)
-        @handlers[write].outgoing.slice!(0..(sent - 1))
+        if @handlers[write].outgoing?
+          sent = write.send(@handlers[write].outgoing, 0)
+          @handlers[write].outgoing.slice!(0..(sent - 1))
+        end
+      
+        if @handlers[write].close? && !@handlers[write].outgoing?
+          write.close
+          @handlers.delete(write)
+        end
       end
     end
   end
